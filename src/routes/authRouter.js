@@ -3,9 +3,9 @@ import {
   registerUser,
   loginUser,
   logoutUser,
-} from "../controllers/userAuthController.js";
+} from "../controllers/auth/userAuthController.js";
 
-import { registerFoodPartner } from "../controllers/foodPartnerAuthController.js";
+import { registerFoodPartner } from "../controllers/auth/foodPartnerAuthController.js";
 
 const router = express.Router();
 
