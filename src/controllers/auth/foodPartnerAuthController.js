@@ -59,3 +59,44 @@ export const registerFoodPartner = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+// Login food partner
+
+export const loginFoodpartner = async (req, res) => {
+  const { email, password } = req.body;
+
+  // Chack the email
+  const foodPartner = await foodPartnerModel.findOne({ email });
+  if (!foodPartner)
+    return res
+      .status(400)
+      .json({ message: "user not found, pease enter a valif email" });
+
+  //Chacking password
+  const isPasswordValid = bcrypt.compare(password, foodPartner.password);
+  if (!isPasswordValid)
+    return res.status(400).json({ message: "Invalid email or password" });
+
+  const token = jwt.sign(
+    {
+      id: foodPartner._id,
+    },
+    process.env.JWT_SECRET
+  );
+  res.cookie(token);
+
+  res.status(200).json({
+    message: "User logged in successfully",
+    foodPartner: {
+      id: foodPartner._id,
+      name: foodPartner.name,
+      email: foodPartner.email,
+    },
+  });
+};
+
+// Logout food partner
+export const logoutFoodPartner = async (_, res) => {
+  res.clearCookie("token");
+  res.status(200).json({ message: "User looged out successfully." });
+};

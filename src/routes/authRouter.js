@@ -5,7 +5,11 @@ import {
   logoutUser,
 } from "../controllers/auth/userAuthController.js";
 
-import { registerFoodPartner } from "../controllers/auth/foodPartnerAuthController.js";
+import {
+  registerFoodPartner,
+  loginFoodpartner,
+  logoutFoodPartner,
+} from "../controllers/auth/foodPartnerAuthController.js";
 
 const router = express.Router();
 
@@ -16,5 +20,7 @@ router.post("/user/logout", logoutUser);
 
 // food partner auth APIs
 router.post("/food-partner/register", registerFoodPartner);
+router.post("/food-partner/login", loginFoodpartner);
+router.post("/food-partner/logout", logoutFoodPartner);
 
 export default router;
