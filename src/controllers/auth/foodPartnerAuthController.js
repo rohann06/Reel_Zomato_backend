@@ -1,4 +1,61 @@
+import jwt from "jsonwebtoken";
+import { foodPartnerModel } from "../../models/foodPartnerMoadel.js";
+import bcrypt from "bcryptjs";
+
 // Register food partner
-export const registerFoodPartner = (req, res) => {
-  const { name, email, password, phone, address, contacyName } = req.body;
+export const registerFoodPartner = async (req, res) => {
+  const { name, email, password, phone, address, contactName } = req.body;
+
+  // Validate required fields
+  if (!name || !email || !password || !phone || !address || !contactName) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  try {
+    //checking for the same email
+    const emailEexists = await foodPartnerModel.findOne({ email });
+    if (emailEexists)
+      return res.status(400).json({ message: "user already exist" });
+
+    //Chacking for the 10dig in mobile number
+    if (!/^\d{10}$/.test(String(phone))) {
+      return res
+        .status(400)
+        .json({ message: "Please enter a valid 10-digit phone number" });
+    }
+
+    const hasedPassword = await bcrypt.hash(password, 10);
+
+    const foodPartenr = await foodPartnerModel.create({
+      name,
+      email,
+      password: hasedPassword,
+      phone,
+      address,
+      contactName,
+    });
+
+    const token = jwt.sign(
+      {
+        id: foodPartenr._id,
+      },
+      process.env.JWT_SECRET
+    );
+    res.cookie("token", token);
+
+    res.status(201).json({
+      message: "Food partner creatd successfully",
+      foodPartenr: {
+        _id: foodPartenr._id,
+        name: foodPartenr.name,
+        email: foodPartenr.email,
+        phone: foodPartenr.phone,
+        address: foodPartenr.address,
+        contactName: foodPartenr.contacyName,
+      },
+    });
+  } catch (error) {
+    console.log("Something went wrong in server", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };

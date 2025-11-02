@@ -47,10 +47,10 @@ export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = userModel.findOne({ email });
+    const user = await userModel.findOne({ email });
     if (!user) return res.status(400).json({ message: "User does not exist" });
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = bcrypt.compare(password, user.password);
     if (!isPasswordValid)
       return res.status(400).json({ message: "Invalid email or password" });
 
