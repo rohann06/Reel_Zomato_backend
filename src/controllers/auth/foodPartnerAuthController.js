@@ -61,7 +61,6 @@ export const registerFoodPartner = async (req, res) => {
 };
 
 // Login food partner
-
 export const loginFoodpartner = async (req, res) => {
   const { email, password } = req.body;
 
@@ -73,7 +72,7 @@ export const loginFoodpartner = async (req, res) => {
       .json({ message: "user not found, pease enter a valif email" });
 
   //Chacking password
-  const isPasswordValid = bcrypt.compare(password, foodPartner.password);
+  const isPasswordValid = await bcrypt.compare(password, foodPartner.password);
   if (!isPasswordValid)
     return res.status(400).json({ message: "Invalid email or password" });
 
@@ -83,7 +82,7 @@ export const loginFoodpartner = async (req, res) => {
     },
     process.env.JWT_SECRET
   );
-  res.cookie(token);
+  res.cookie("token", token);
 
   res.status(200).json({
     message: "User logged in successfully",
