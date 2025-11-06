@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 
 export const foodPartnerSchema = mongoose.Schema({
-  name: {
+  ownerName: {
     type: String,
     required: true,
   },
-  contactName: {
+  restaurantName: {
     type: String,
     required: true,
   },
@@ -13,7 +13,7 @@ export const foodPartnerSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  address: {
+  restaurantAddress: {
     type: String,
     required: true,
   },

@@ -4,10 +4,24 @@ import bcrypt from "bcryptjs";
 
 // Register food partner
 export const registerFoodPartner = async (req, res) => {
-  const { name, email, password, phone, address, contactName } = req.body;
+  const {
+    ownerName,
+    email,
+    password,
+    phone,
+    restaurantAddress,
+    restaurantName,
+  } = req.body;
 
   // Validate required fields
-  if (!name || !email || !password || !phone || !address || !contactName) {
+  if (
+    !ownerName ||
+    !email ||
+    !password ||
+    !phone ||
+    !restaurantAddress ||
+    !restaurantName
+  ) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
@@ -27,12 +41,12 @@ export const registerFoodPartner = async (req, res) => {
     const hasedPassword = await bcrypt.hash(password, 10);
 
     const foodPartenr = await foodPartnerModel.create({
-      name,
+      ownerName,
       email,
       password: hasedPassword,
       phone,
-      address,
-      contactName,
+      restaurantAddress,
+      restaurantName,
     });
 
     const token = jwt.sign(
@@ -47,11 +61,11 @@ export const registerFoodPartner = async (req, res) => {
       message: "Food partner creatd successfully",
       foodPartenr: {
         _id: foodPartenr._id,
-        name: foodPartenr.name,
+        ownerName: foodPartenr.ownerName,
         email: foodPartenr.email,
         phone: foodPartenr.phone,
-        address: foodPartenr.address,
-        contactName: foodPartenr.contacyName,
+        restaurantAddress: foodPartenr.restaurantAddress,
+        restaurantName: foodPartenr.restaurantName,
       },
     });
   } catch (error) {
@@ -88,7 +102,7 @@ export const loginFoodpartner = async (req, res) => {
     message: "User logged in successfully",
     foodPartner: {
       id: foodPartner._id,
-      name: foodPartner.name,
+      ownerName: foodPartner.ownerName,
       email: foodPartner.email,
     },
   });
