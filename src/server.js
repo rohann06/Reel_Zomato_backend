@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors"; // 🟢 ADD THIS
 import authRouter from "./routes/authRouter.js";
 import foodRouter from "./routes/foodRouter.js";
 import { connectDB } from "./config/db.js";
@@ -10,7 +11,15 @@ dotenv.config();
 const app = express();
 const PORT = 5001;
 
-// Middle ware
+// 🧩 CORS CONFIG
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "https://food-scroll.vercel.app"], // your frontend URLs
+    credentials: true,
+  })
+);
+
+// Middlewares
 app.use(cookieParser());
 app.use(express.json());
 
@@ -18,7 +27,7 @@ app.use(express.json());
 app.use("/api/auth", authRouter);
 app.use("/api/food", foodRouter);
 
-// Start server after connecting the data base
+// Start server after connecting DB
 connectDB().then(() => {
-  app.listen(PORT, () => console.log(`Server is runnig on PORT:${PORT}`));
+  app.listen(PORT, () => console.log(`Server is running on PORT:${PORT}`));
 });
