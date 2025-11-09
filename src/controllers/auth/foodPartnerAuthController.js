@@ -40,7 +40,7 @@ export const registerFoodPartner = async (req, res) => {
 
     const hasedPassword = await bcrypt.hash(password, 10);
 
-    const foodPartenr = await foodPartnerModel.create({
+    const foodPartner = await foodPartnerModel.create({
       ownerName,
       email,
       password: hasedPassword,
@@ -51,26 +51,22 @@ export const registerFoodPartner = async (req, res) => {
 
     const token = jwt.sign(
       {
-        id: foodPartenr._id,
+        id: foodPartner._id,
       },
       process.env.JWT_SECRET
     );
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true, // only true if using https (like render.com)
-      sameSite: "none", // 👈 required for cross-site cookies
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+
+    res.cookie("token", token);
 
     res.status(201).json({
       message: "Food partner creatd successfully",
       foodPartenr: {
-        _id: foodPartenr._id,
-        ownerName: foodPartenr.ownerName,
-        email: foodPartenr.email,
-        phone: foodPartenr.phone,
-        restaurantAddress: foodPartenr.restaurantAddress,
-        restaurantName: foodPartenr.restaurantName,
+        _id: foodPartner._id,
+        ownerName: foodPartner.ownerName,
+        email: foodPartner.email,
+        phone: foodPartner.phone,
+        restaurantAddress: foodPartner.restaurantAddress,
+        restaurantName: foodPartner.restaurantName,
       },
     });
   } catch (error) {
@@ -101,12 +97,8 @@ export const loginFoodpartner = async (req, res) => {
     },
     process.env.JWT_SECRET
   );
-  res.cookie("token", token, {
-    httpOnly: true,
-    secure: true, // only true if using https (like render.com)
-    sameSite: "none", // 👈 required for cross-site cookies
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
+
+  res.cookie("token", token);
 
   res.status(200).json({
     message: "User logged in successfully",

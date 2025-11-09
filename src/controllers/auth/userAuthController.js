@@ -22,16 +22,12 @@ export const registerUser = async (req, res) => {
 
     const token = jwt.sign(
       {
-        id: user._id,
+        id: foodPartner._id,
       },
       process.env.JWT_SECRET
     );
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true, // only true if using https (like render.com)
-      sameSite: "none", // 👈 required for cross-site cookies
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+
+    res.cookie("token", token);
 
     res.status(201).json({
       message: "User registered successfully",
@@ -65,12 +61,8 @@ export const loginUser = async (req, res) => {
       },
       process.env.JWT_SECRET
     );
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true, // only true if using https (like render.com)
-      sameSite: "none", // 👈 required for cross-site cookies
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+
+    res.cookie("token", token);
 
     res.status(200).json({
       message: "users logged in successfully",
