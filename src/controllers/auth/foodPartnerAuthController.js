@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
 import { foodPartnerModel } from "../../models/foodPartnerMoadel.js";
 import bcrypt from "bcryptjs";
-// Register
+
+// Register food partner
 export const registerFoodPartner = async (req, res) => {
   const {
     ownerName,
@@ -11,29 +12,24 @@ export const registerFoodPartner = async (req, res) => {
     restaurantAddress,
     restaurantName,
   } = req.body;
-  if (
-    !ownerName ||
-    !email ||
-    !password ||
-    !phone ||
-    !restaurantAddress ||
-    !restaurantName
-  ) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
 
   try {
+    // Check if user already exists
     const emailExists = await foodPartnerModel.findOne({ email });
     if (emailExists)
       return res.status(400).json({ message: "User already exists" });
 
+    // Validate phone
     if (!/^\d{10}$/.test(String(phone))) {
       return res
         .status(400)
         .json({ message: "Please enter a valid 10-digit phone number" });
     }
 
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user
     const foodPartner = await foodPartnerModel.create({
       ownerName,
       email,
@@ -43,15 +39,17 @@ export const registerFoodPartner = async (req, res) => {
       restaurantName,
     });
 
-    const token = jwt.sign(
-      {
-        id: foodPartner._id,
-      },
-      { expiresIn: "7d" },
-      process.env.JWT_SECRET
-    );
+    // Generate JWT
+    const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
-    res.cookie("token", token);
+    // Set cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true, // must be true for HTTPS
+      sameSite: "none",
+    });
 
     res.status(201).json({
       message: "Food partner created successfully",
@@ -65,12 +63,12 @@ export const registerFoodPartner = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log("Error in registerFoodPartner:", error);
+    console.error("Error in registerFoodPartner:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// Login
+// Login food partner
 export const loginFoodpartner = async (req, res) => {
   const { email, password } = req.body;
 
@@ -90,7 +88,11 @@ export const loginFoodpartner = async (req, res) => {
       expiresIn: "7d",
     });
 
-    res.cookie("token", token);
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
 
     res.status(200).json({
       message: "User logged in successfully",
@@ -101,7 +103,7 @@ export const loginFoodpartner = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log("Error in loginFoodpartner:", error);
+    console.error("Error in loginFoodpartner:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -109,7 +111,7 @@ export const loginFoodpartner = async (req, res) => {
 // Logout food partner
 export const logoutFoodPartner = async (_, res) => {
   res.clearCookie("token", {
-    httpOnly: false,
+    httpOnly: true,
     secure: true,
     sameSite: "none",
   });
