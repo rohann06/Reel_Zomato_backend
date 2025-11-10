@@ -1,8 +1,7 @@
 import jwt from "jsonwebtoken";
 import { foodPartnerModel } from "../../models/foodPartnerMoadel.js";
 import bcrypt from "bcryptjs";
-
-// Register food partner
+// Register
 export const registerFoodPartner = async (req, res) => {
   const {
     ownerName,
@@ -12,7 +11,6 @@ export const registerFoodPartner = async (req, res) => {
     restaurantAddress,
     restaurantName,
   } = req.body;
-
   if (
     !ownerName ||
     !email ||
@@ -25,12 +23,10 @@ export const registerFoodPartner = async (req, res) => {
   }
 
   try {
-    // Check for existing email
     const emailExists = await foodPartnerModel.findOne({ email });
     if (emailExists)
       return res.status(400).json({ message: "User already exists" });
 
-    // Validate phone number
     if (!/^\d{10}$/.test(String(phone))) {
       return res
         .status(400)
@@ -38,7 +34,6 @@ export const registerFoodPartner = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const foodPartner = await foodPartnerModel.create({
       ownerName,
       email,
@@ -52,12 +47,11 @@ export const registerFoodPartner = async (req, res) => {
       expiresIn: "7d",
     });
 
-    // ✅ Cookie setup for Render & Brave
     res.cookie("token", token, {
-      httpOnly: false, // set to true if you don’t want frontend JS to read it
-      secure: true, // Render uses HTTPS
-      sameSite: "none", // required for cross-site requests
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.status(201).json({
@@ -70,6 +64,7 @@ export const registerFoodPartner = async (req, res) => {
         restaurantAddress: foodPartner.restaurantAddress,
         restaurantName: foodPartner.restaurantName,
       },
+      token, // optional if you want to access it in frontend
     });
   } catch (error) {
     console.log("Error in registerFoodPartner:", error);
@@ -77,16 +72,14 @@ export const registerFoodPartner = async (req, res) => {
   }
 };
 
-// Login food partner
+// Login
 export const loginFoodpartner = async (req, res) => {
   const { email, password } = req.body;
 
   try {
     const foodPartner = await foodPartnerModel.findOne({ email });
     if (!foodPartner)
-      return res
-        .status(400)
-        .json({ message: "User not found. Please enter a valid email." });
+      return res.status(400).json({ message: "User not found" });
 
     const isPasswordValid = await bcrypt.compare(
       password,
@@ -101,7 +94,7 @@ export const loginFoodpartner = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: false,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -109,10 +102,11 @@ export const loginFoodpartner = async (req, res) => {
     res.status(200).json({
       message: "User logged in successfully",
       foodPartner: {
-        id: foodPartner._id,
+        _id: foodPartner._id,
         ownerName: foodPartner.ownerName,
         email: foodPartner.email,
       },
+      token, // optional
     });
   } catch (error) {
     console.log("Error in loginFoodpartner:", error);
