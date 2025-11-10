@@ -13,7 +13,6 @@ export const registerFoodPartner = async (req, res) => {
     restaurantName,
   } = req.body;
 
-  // Validate required fields
   if (
     !ownerName ||
     !email ||
@@ -26,41 +25,44 @@ export const registerFoodPartner = async (req, res) => {
   }
 
   try {
-    //checking for the same email
-    const emailEexists = await foodPartnerModel.findOne({ email });
-    if (emailEexists)
-      return res.status(400).json({ message: "user already exist" });
+    // Check for existing email
+    const emailExists = await foodPartnerModel.findOne({ email });
+    if (emailExists)
+      return res.status(400).json({ message: "User already exists" });
 
-    //Chacking for the 10dig in mobile number
+    // Validate phone number
     if (!/^\d{10}$/.test(String(phone))) {
       return res
         .status(400)
         .json({ message: "Please enter a valid 10-digit phone number" });
     }
 
-    const hasedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const foodPartner = await foodPartnerModel.create({
       ownerName,
       email,
-      password: hasedPassword,
+      password: hashedPassword,
       phone,
       restaurantAddress,
       restaurantName,
     });
 
-    const token = jwt.sign(
-      {
-        id: foodPartner._id,
-      },
-      process.env.JWT_SECRET
-    );
+    const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
-    res.cookie("token", token);
+    // ✅ Cookie setup for Render & Brave
+    res.cookie("token", token, {
+      httpOnly: false, // set to true if you don’t want frontend JS to read it
+      secure: true, // Render uses HTTPS
+      sameSite: "none", // required for cross-site requests
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
     res.status(201).json({
-      message: "Food partner creatd successfully",
-      foodPartenr: {
+      message: "Food partner created successfully",
+      foodPartner: {
         _id: foodPartner._id,
         ownerName: foodPartner.ownerName,
         email: foodPartner.email,
@@ -70,7 +72,7 @@ export const registerFoodPartner = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log("Something went wrong in server", error);
+    console.log("Error in registerFoodPartner:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -79,39 +81,51 @@ export const registerFoodPartner = async (req, res) => {
 export const loginFoodpartner = async (req, res) => {
   const { email, password } = req.body;
 
-  // Chack the email
-  const foodPartner = await foodPartnerModel.findOne({ email });
-  if (!foodPartner)
-    return res
-      .status(400)
-      .json({ message: "user not found, pease enter a valif email" });
+  try {
+    const foodPartner = await foodPartnerModel.findOne({ email });
+    if (!foodPartner)
+      return res
+        .status(400)
+        .json({ message: "User not found. Please enter a valid email." });
 
-  //Chacking password
-  const isPasswordValid = await bcrypt.compare(password, foodPartner.password);
-  if (!isPasswordValid)
-    return res.status(400).json({ message: "Invalid email or password" });
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      foodPartner.password
+    );
+    if (!isPasswordValid)
+      return res.status(400).json({ message: "Invalid email or password" });
 
-  const token = jwt.sign(
-    {
-      id: foodPartner._id,
-    },
-    process.env.JWT_SECRET
-  );
+    const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
-  res.cookie("token", token);
+    res.cookie("token", token, {
+      httpOnly: false,
+      secure: true,
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
-  res.status(200).json({
-    message: "User logged in successfully",
-    foodPartner: {
-      id: foodPartner._id,
-      ownerName: foodPartner.ownerName,
-      email: foodPartner.email,
-    },
-  });
+    res.status(200).json({
+      message: "User logged in successfully",
+      foodPartner: {
+        id: foodPartner._id,
+        ownerName: foodPartner.ownerName,
+        email: foodPartner.email,
+      },
+    });
+  } catch (error) {
+    console.log("Error in loginFoodpartner:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 // Logout food partner
 export const logoutFoodPartner = async (_, res) => {
-  res.clearCookie("token");
-  res.status(200).json({ message: "User looged out successfully." });
+  res.clearCookie("token", {
+    httpOnly: false,
+    secure: true,
+    sameSite: "none",
+  });
+  res.status(200).json({ message: "User logged out successfully." });
 };
