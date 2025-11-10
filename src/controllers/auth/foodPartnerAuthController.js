@@ -43,16 +43,15 @@ export const registerFoodPartner = async (req, res) => {
       restaurantName,
     });
 
-    const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const token = jwt.sign(
+      {
+        id: foodPartner._id,
+      },
+      { expiresIn: "7d" },
+      process.env.JWT_SECRET
+    );
 
-    res.cookie("token", token, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie("token", token);
 
     res.status(201).json({
       message: "Food partner created successfully",
@@ -64,7 +63,6 @@ export const registerFoodPartner = async (req, res) => {
         restaurantAddress: foodPartner.restaurantAddress,
         restaurantName: foodPartner.restaurantName,
       },
-      token, // optional if you want to access it in frontend
     });
   } catch (error) {
     console.log("Error in registerFoodPartner:", error);
@@ -92,12 +90,7 @@ export const loginFoodpartner = async (req, res) => {
       expiresIn: "7d",
     });
 
-    res.cookie("token", token, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie("token", token);
 
     res.status(200).json({
       message: "User logged in successfully",
@@ -106,7 +99,6 @@ export const loginFoodpartner = async (req, res) => {
         ownerName: foodPartner.ownerName,
         email: foodPartner.email,
       },
-      token, // optional
     });
   } catch (error) {
     console.log("Error in loginFoodpartner:", error);
