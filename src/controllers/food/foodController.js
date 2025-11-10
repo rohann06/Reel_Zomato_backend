@@ -2,44 +2,70 @@ import { uploadFile } from "../../services/storageService.js";
 import { v4 as uuidv4 } from "uuid";
 import { foodModel } from "../../models/foodModel.js";
 
-//Create food items
+// Create food items
 export const createFood = async (req, res) => {
   const { name, description } = req.body;
 
+  // Validate required fields
+  if (!name || !description) {
+    return res
+      .status(400)
+      .json({ message: "Name and description are required." });
+  }
+
+  if (!req.file) {
+    return res.status(400).json({ message: "Video file is required." });
+  }
+
   try {
     const uploadResult = await uploadFile(req.file.buffer, uuidv4());
+
     const foodItem = await foodModel.create({
-      name: name,
-      description: description,
+      name,
+      description,
       video: uploadResult.url,
       foodPartner: req.foodPartner._id,
     });
+
     res.status(201).json({
-      message: "Food item created successFully",
+      message: "Food item created successfully.",
       foodItem: {
+        _id: foodItem._id,
         name: foodItem.name,
         description: foodItem.description,
         video: foodItem.video,
         foodPartner: foodItem.foodPartner,
-        _id: foodItem._id,
       },
     });
   } catch (error) {
-    console.log("Error in server:", error);
-    res.status(500).json({ message: "Something went wrong on server side." });
+    console.error("Server error:", error.message);
+    res
+      .status(500)
+      .json({ message: "Something went wrong on the server side." });
   }
 };
 
-//Get all food items
+// Get all food items for the logged-in food partner
 export const getFood = async (req, res) => {
   try {
-    const foodItems = await foodModel.find({});
+    const foodItems = await foodModel.find({
+      foodPartner: req.foodPartner._id,
+    });
+
     res.status(200).json({
-      message: "All the food items fetched successfull",
-      foodItems,
+      message: "Food items fetched successfully.",
+      foodItems: foodItems.map((item) => ({
+        _id: item._id,
+        name: item.name,
+        description: item.description,
+        video: item.video,
+        foodPartner: item.foodPartner,
+      })),
     });
   } catch (error) {
-    console.log("Error in server:", error);
-    res.status(500).json({ message: "Something went wrong on server side." });
+    console.error("Server error:", error.message);
+    res
+      .status(500)
+      .json({ message: "Something went wrong on the server side." });
   }
 };

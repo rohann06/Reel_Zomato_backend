@@ -93,7 +93,7 @@ export const loginFoodpartner = async (req, res) => {
       secure: true,
       sameSite: "none",
     });
-
+    console.log(cookie);
     res.status(200).json({
       message: "User logged in successfully",
       foodPartner: {
