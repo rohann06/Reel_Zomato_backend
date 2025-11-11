@@ -40,16 +40,10 @@ export const registerFoodPartner = async (req, res) => {
     });
 
     // Generate JWT
-    const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET);
 
     // Set cookie
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true, // must be true for HTTPS
-      sameSite: "none",
-    });
+    res.cookie("token", token);
 
     res.status(201).json({
       message: "Food partner created successfully",
@@ -84,16 +78,10 @@ export const loginFoodpartner = async (req, res) => {
     if (!isPasswordValid)
       return res.status(400).json({ message: "Invalid email or password" });
 
-    const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET);
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-    });
-    console.log(cookie);
+    res.cookie("token", token);
+
     res.status(200).json({
       message: "User logged in successfully",
       foodPartner: {
