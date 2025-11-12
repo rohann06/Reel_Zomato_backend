@@ -4,7 +4,7 @@ import { foodModel } from "../../models/foodModel.js";
 
 // Create food items
 export const createFood = async (req, res) => {
-  const { name, description } = req.body;
+  const { name, description, price } = req.body;
 
   // Validate required fields
   if (!name || !description) {
@@ -22,6 +22,7 @@ export const createFood = async (req, res) => {
 
     const foodItem = await foodModel.create({
       name,
+      price,
       description,
       video: uploadResult.url,
       foodPartner: req.foodPartner._id,
@@ -32,6 +33,7 @@ export const createFood = async (req, res) => {
       foodItem: {
         _id: foodItem._id,
         name: foodItem.name,
+        price: foodItem.price,
         description: foodItem.description,
         video: foodItem.video,
         foodPartner: foodItem.foodPartner,
@@ -57,6 +59,7 @@ export const getFood = async (req, res) => {
       foodItems: foodItems.map((item) => ({
         _id: item._id,
         name: item.name,
+        price: item.price,
         description: item.description,
         video: item.video,
         foodPartner: item.foodPartner,

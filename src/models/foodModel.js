@@ -5,6 +5,10 @@ export const foodSchema = mongoose.Schema({
     type: String,
     require: true,
   },
+  price: {
+    type: String,
+    require: true,
+  },
   video: {
     type: String,
     require: true,
