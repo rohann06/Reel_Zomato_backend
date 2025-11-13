@@ -10,6 +10,7 @@ export const getFoodPartnerInfo = async (req, res) => {
         _id: foodPartner._id,
         ownerName: foodPartner.ownerName,
         restaurantName: foodPartner.restaurantName,
+        restaurantAddress: foodPartner.restaurantAddress,
         phone: foodPartner.phone,
         email: foodPartner.email,
         address: foodPartner.address,
