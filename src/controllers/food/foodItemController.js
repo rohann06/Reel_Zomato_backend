@@ -1,4 +1,5 @@
 import { foodModel } from "../../models/foodModel.js";
+import { foodPartnerModel } from "../../models/foodPartnerMoadel.js";
 
 export const getFoodItem = async (req, res) => {
   try {
@@ -9,7 +10,9 @@ export const getFoodItem = async (req, res) => {
     }
 
     const foodItem = await foodModel.findById(foodId);
-
+    const foodPartnerDetails = await foodPartnerModel.findById(
+      req.foodPartner._id
+    );
     if (!foodItem) {
       return res.status(404).json({ message: "Food item not found." });
     }
@@ -22,7 +25,12 @@ export const getFoodItem = async (req, res) => {
         price: foodItem.price,
         description: foodItem.description,
         video: foodItem.video,
-        foodPartner: foodItem.foodPartner,
+        foodPartnerDetails: {
+          _id: foodPartnerDetails._id,
+          restaurantName: foodPartnerDetails.restaurantName,
+          restaurantAddress: foodPartnerDetails.restaurantAddress,
+          phone: foodPartnerDetails.phone,
+        },
       },
     });
   } catch (error) {
