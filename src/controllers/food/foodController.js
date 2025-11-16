@@ -36,6 +36,7 @@ export const createFood = async (req, res) => {
         price: foodItem.price,
         description: foodItem.description,
         video: foodItem.video,
+        restaurantName: item.foodPartner?.restaurantName,
         foodPartner: foodItem.foodPartner,
       },
     });
@@ -47,13 +48,12 @@ export const createFood = async (req, res) => {
   }
 };
 
-// Get all food items for the logged-in food partner
-export const getFood = async (req, res) => {
+// Get all food items for the logged-in users
+export const getFood = async (_, res) => {
+  const foodItems = await foodModel
+    .find()
+    .populate("foodPartner", "restaurantName");
   try {
-    const foodItems = await foodModel.find({
-      foodPartner: req.foodPartner._id,
-    });
-
     res.status(200).json({
       message: "Food items fetched successfully.",
       foodItems: foodItems.map((item) => ({
