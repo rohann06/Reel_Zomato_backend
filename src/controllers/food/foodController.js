@@ -36,7 +36,7 @@ export const createFood = async (req, res) => {
         price: foodItem.price,
         description: foodItem.description,
         video: foodItem.video,
-        restaurantName: item.foodPartner?.restaurantName,
+        restaurantName: foodItem.foodPartner?.restaurantName,
         foodPartner: foodItem.foodPartner,
       },
     });

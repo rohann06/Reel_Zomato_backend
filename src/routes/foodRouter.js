@@ -1,12 +1,14 @@
 import express from "express";
-import { createFood, getFood } from "../controllers/food/foodController.js";
 import {
   authMiddleware,
   authUserMiddleware,
 } from "../middleware/authMiddleware.js";
 import multer from "multer";
+//Controllers
+import { createFood, getFood } from "../controllers/food/foodController.js";
 import { getFoodPartnerInfo } from "../controllers/food/foodPartnerInfo.js";
 import { getFoodItem } from "../controllers/food/FoodItemController.js";
+import { getUserFoodPartnerInfo } from "../controllers/food/userFoodpartnerInfo.js";
 
 const router = express.Router();
 
@@ -18,5 +20,6 @@ router.post("/addfood", authMiddleware, upload.single("video"), createFood);
 router.get("/getallfood", authUserMiddleware, getFood);
 router.get("/getfoodpartnerinfo", authMiddleware, getFoodPartnerInfo);
 router.get("/getfooditem", authMiddleware, getFoodItem);
+router.get("/userFoodparterinfo", authUserMiddleware, getUserFoodPartnerInfo);
 
 export default router;
