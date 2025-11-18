@@ -7,7 +7,10 @@ import multer from "multer";
 //Controllers
 import { createFood, getFood } from "../controllers/food/foodController.js";
 import { getFoodPartnerInfo } from "../controllers/food/foodPartnerInfo.js";
-import { getFoodItem } from "../controllers/food/FoodItemController.js";
+import {
+  getFoodItem,
+  getuserFoodItem,
+} from "../controllers/food/FoodItemController.js";
 import { getUserFoodPartnerInfo } from "../controllers/food/userFoodpartnerInfo.js";
 
 const router = express.Router();
@@ -21,5 +24,6 @@ router.get("/getallfood", authUserMiddleware, getFood);
 router.get("/getfoodpartnerinfo", authMiddleware, getFoodPartnerInfo);
 router.get("/getfooditem", authMiddleware, getFoodItem);
 router.get("/userFoodparterinfo", authUserMiddleware, getUserFoodPartnerInfo);
+router.get("/getuserfooditem", authUserMiddleware, getuserFoodItem);
 
 export default router;
