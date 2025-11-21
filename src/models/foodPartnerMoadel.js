@@ -1,3 +1,4 @@
+// foodPartner.model.js
 import mongoose from "mongoose";
 
 export const foodPartnerSchema = mongoose.Schema(
@@ -18,6 +19,10 @@ export const foodPartnerSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    pincode: {
+      type: String,
+      required: true,
+    },
     email: {
       type: String,
       required: true,
@@ -27,6 +32,12 @@ export const foodPartnerSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    orders: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "foodOrder",
+      },
+    ],
   },
   {
     timestamps: true,
