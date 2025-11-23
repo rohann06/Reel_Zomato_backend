@@ -19,9 +19,17 @@ const foodOrderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    foodId: {
+      type: String,
+      required: true,
+    },
     foodItem: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "food",
+      required: true,
+    },
+    foodItemPrice: {
+      type: String,
       required: true,
     },
     user: {
