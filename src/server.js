@@ -14,7 +14,7 @@ const PORT = 5001;
 // 🧩 CORS CONFIG
 app.use(
   cors({
-    origin: "http://localhost:3000", // your frontend URLs
+    origin: "https://foodscroll06.vercel.app/", // your frontend URLs
     credentials: true,
   })
 );
