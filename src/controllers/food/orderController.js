@@ -104,16 +104,29 @@ export const userOrders = async (req, res) => {
   try {
     const userId = req.user._id;
 
+    console.log("Fetching orders for user:", userId);
+
     const orders = await foodOrderModel
       .find({ user: userId })
-      .populate("foodItem")
-      .populate("foodPartner", "restaurantName restaurantAddress")
-      .sort({ createdAt: -1 }); // Most recent first
+      .populate("foodItem") // Populate food item details
+      .populate("foodPartner", "restaurantName restaurantAddress") // Populate restaurant details
+      .sort({ createdAt: -1 }) // Most recent first
+      .lean(); // Convert to plain JavaScript objects for better performance
 
-    res.status(200).json({ orders });
+    console.log(`Found ${orders.length} orders for user`);
+
+    res.status(200).json({
+      success: true,
+      orders,
+      count: orders.length,
+    });
   } catch (error) {
     console.error("Error fetching user orders:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };
 
