@@ -11,7 +11,7 @@ import { getFoodPartnerInfo } from "../controllers/food/foodPartnerInfo.js";
 import {
   getFoodItem,
   getuserFoodItem,
-} from "../controllers/food/FoodItemController.js";
+} from "../controllers/food/foodItemController.js";
 import { getUserFoodPartnerInfo } from "../controllers/food/userFoodpartnerInfo.js";
 import {
   userOrders,
