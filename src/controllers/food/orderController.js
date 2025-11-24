@@ -7,7 +7,7 @@ export const orderFood = async (req, res) => {
   try {
     const {
       foodId,
-      quantity,
+      foodQuantity,
       userName,
       userAddress,
       userPhone,
@@ -15,34 +15,64 @@ export const orderFood = async (req, res) => {
     } = req.body;
     const userId = req.user._id;
 
+    // Log the incoming data for debugging
+    console.log("Order data received:", {
+      foodId,
+      foodQuantity,
+      userName,
+      userAddress,
+      userPhone,
+      foodItemPrice,
+      userId,
+    });
+
+    // Validate all fields
     if (
       !foodId ||
-      !quantity ||
+      !foodQuantity ||
       !userName ||
       !userAddress ||
       !userPhone ||
-      foodItemPrice
+      !foodItemPrice
     ) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
+    // Find the food item
     const food = await foodModel.findById(foodId);
     if (!food) {
+      console.log("Food item not found:", foodId);
       return res.status(404).json({ message: "Food item not found" });
     }
 
+    console.log("Food found:", food);
+
+    // Verify food partner exists
+    if (!food.foodPartner) {
+      console.log("No food partner associated with this food item");
+      return res
+        .status(400)
+        .json({ message: "Food partner not found for this item" });
+    }
+
+    // Create new order
     const newOrder = new foodOrderModel({
       user: userId,
       foodItem: foodId,
       foodPartner: food.foodPartner,
-      foodQuantity: quantity,
-      foodItemPrice: foodItemPrice,
-      userName,
-      userAddress,
-      userPhone,
+      foodQuantity: Number(foodQuantity),
+      foodItemPrice: parseFloat(foodItemPrice), // Convert to number
+      userName: userName.trim(),
+      userAddress: userAddress.trim(),
+      userPhone: userPhone.trim(),
+      foodId: foodId, // Add this if your schema still has foodId field
     });
 
+    console.log("Creating order:", newOrder);
+
+    // Save the order
     const savedOrder = await newOrder.save();
+    console.log("Order saved successfully:", savedOrder._id);
 
     // Update user's orders
     await userModel.findByIdAndUpdate(userId, {
@@ -59,7 +89,14 @@ export const orderFood = async (req, res) => {
       .json({ message: "Order placed successfully", order: savedOrder });
   } catch (error) {
     console.error("Error placing order:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error details:", error.message);
+    console.error("Error stack:", error.stack);
+
+    // Send more detailed error for debugging
+    res.status(500).json({
+      message: "Internal server error",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };
 
@@ -70,7 +107,8 @@ export const userOrders = async (req, res) => {
     const orders = await foodOrderModel
       .find({ user: userId })
       .populate("foodItem")
-      .populate("foodPartner", "restaurantName restaurantAddress");
+      .populate("foodPartner", "restaurantName restaurantAddress")
+      .sort({ createdAt: -1 }); // Most recent first
 
     res.status(200).json({ orders });
   } catch (error) {
@@ -86,7 +124,8 @@ export const foodPartnerOrders = async (req, res) => {
     const orders = await foodOrderModel
       .find({ foodPartner: partnerId })
       .populate("foodItem")
-      .populate("user", "fullName email");
+      .populate("user", "fullName email")
+      .sort({ createdAt: -1 }); // Most recent first
 
     res.status(200).json({ orders });
   } catch (error) {
@@ -95,5 +134,5 @@ export const foodPartnerOrders = async (req, res) => {
   }
 };
 
-// Keeping the typo export as an alias just in case, but the main logic is in foodPartnerOrders
+// Keeping the typo export as an alias
 export const fodPaernerOrders = foodPartnerOrders;

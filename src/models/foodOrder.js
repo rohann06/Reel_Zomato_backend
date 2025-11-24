@@ -1,6 +1,4 @@
-// foodOrder.model.js
 import mongoose from "mongoose";
-
 const foodOrderSchema = new mongoose.Schema(
   {
     userName: {
@@ -19,17 +17,14 @@ const foodOrderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    foodId: {
-      type: String,
-      required: true,
-    },
+    // Remove foodId string field
     foodItem: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "food",
       required: true,
     },
     foodItemPrice: {
-      type: String,
+      type: Number, // Changed to Number
       required: true,
     },
     user: {
