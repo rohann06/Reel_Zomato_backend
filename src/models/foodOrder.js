@@ -17,14 +17,13 @@ const foodOrderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    // Remove foodId string field
     foodItem: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "food",
       required: true,
     },
     foodItemPrice: {
-      type: Number, // Changed to Number
+      type: Number,
       required: true,
     },
     user: {
@@ -36,6 +35,11 @@ const foodOrderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "foodPartner",
       required: true,
+    },
+    orderStatus: {
+      type: String,
+      enum: ["pending", "completed", "cancelled"],
+      default: "pending",
     },
   },
   {

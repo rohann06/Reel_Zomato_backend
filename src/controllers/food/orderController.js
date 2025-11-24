@@ -134,18 +134,84 @@ export const foodPartnerOrders = async (req, res) => {
   try {
     const partnerId = req.foodPartner._id;
 
-    const orders = await foodOrderModel
-      .find({ foodPartner: partnerId })
-      .populate("foodItem")
-      .populate("user", "fullName email")
-      .sort({ createdAt: -1 }); // Most recent first
+    console.log("Fetching orders for food partner:", partnerId);
 
-    res.status(200).json({ orders });
+    const orders = await foodOrderModel
+      .find({ foodPartner: partnerId }) // Only this partner's orders
+      .populate("foodItem") // Get food details
+      .populate("user", "fullName email phone") // Get customer details
+      .sort({ createdAt: -1 }) // Most recent first
+      .lean();
+
+    console.log(`Found ${orders.length} orders for partner`);
+
+    // Optional: Calculate total revenue
+    const totalRevenue = orders.reduce((sum, order) => {
+      return sum + order.foodQuantity * order.foodItemPrice;
+    }, 0);
+
+    res.status(200).json({
+      success: true,
+      orders,
+      count: orders.length,
+      totalRevenue: totalRevenue.toFixed(2),
+    });
   } catch (error) {
     console.error("Error fetching partner orders:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };
 
-// Keeping the typo export as an alias
-export const fodPaernerOrders = foodPartnerOrders;
+// 🆕 NEW FUNCTION - Add this to complete orders
+export const completeOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const partnerId = req.foodPartner._id;
+
+    console.log("Completing order:", orderId, "for partner:", partnerId);
+
+    // Find the order and verify it belongs to this food partner
+    const order = await foodOrderModel.findOne({
+      _id: orderId,
+      foodPartner: partnerId,
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found or unauthorized",
+      });
+    }
+
+    // Check if already completed
+    if (order.orderStatus === "completed") {
+      return res.status(400).json({
+        success: false,
+        message: "Order is already completed",
+      });
+    }
+
+    // Update order status to completed
+    order.orderStatus = "completed";
+    await order.save();
+
+    console.log("Order completed successfully:", orderId);
+
+    res.status(200).json({
+      success: true,
+      message: "Order marked as completed",
+      order,
+    });
+  } catch (error) {
+    console.error("Error completing order:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+};
