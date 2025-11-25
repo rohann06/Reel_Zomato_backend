@@ -2,6 +2,15 @@ import jwt from "jsonwebtoken";
 import { foodPartnerModel } from "../../models/foodPartnerMoadel.js";
 import bcrypt from "bcryptjs";
 
+// Helper function for cookie options
+const getCookieOptions = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production", // true in production
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // "none" for cross-origin
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  path: "/",
+});
+
 // Register food partner
 export const registerFoodPartner = async (req, res) => {
   const {
@@ -40,10 +49,12 @@ export const registerFoodPartner = async (req, res) => {
     });
 
     // Generate JWT
-    const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
-    // Set cookie
-    res.cookie("token", token);
+    // Set cookie with proper options
+    res.cookie("token", token, getCookieOptions());
 
     res.status(201).json({
       message: "Food partner created successfully",
@@ -78,9 +89,12 @@ export const loginFoodpartner = async (req, res) => {
     if (!isPasswordValid)
       return res.status(400).json({ message: "Invalid email or password" });
 
-    const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: foodPartner._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
-    res.cookie("token", token);
+    // Set cookie with proper options
+    res.cookie("token", token, getCookieOptions());
 
     res.status(200).json({
       message: "User logged in successfully",
@@ -98,10 +112,6 @@ export const loginFoodpartner = async (req, res) => {
 
 // Logout food partner
 export const logoutFoodPartner = async (_, res) => {
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-  });
+  res.clearCookie("token", getCookieOptions());
   res.status(200).json({ message: "User logged out successfully." });
 };
